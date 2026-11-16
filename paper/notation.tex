@@ -1,0 +1,30 @@
+\section{Notation}\label{app:notation}
+Symbols are listed in the order in which they first appear. Standard symbols ($\RR$, $\Tr$, $\nabla$, $|\cdot|_F$) are omitted, and so are letters defined and used inside a single proof.
+
+\begin{center}\small\begin{tabular}{@{}lp{0.58\textwidth}l@{}}\toprule
+Symbol & Meaning & First appears \\ \midrule
+$L$ & depth, the number of weight matrices & Section~\ref{sec:intro} \\
+$W_l$ & weight matrix of layer $l$, of size $n_l\times n_{l-1}$ & Section~\ref{sec:intro} \\
+$n_0,\dots,n_L$ & input width, hidden widths and output width & Section~\ref{sec:intro} \\
+$C$ & training cost as a function of the product & Section~\ref{sec:intro} \\
+$G$ & the matrix $\nabla C(0)$ defining the homogeneous cost & Section~\ref{sec:intro} \\
+$H$ & homogeneous cost $\Tr(G^\top W_L\cdots W_1)$ & Section~\ref{sec:intro} \\
+$\theta$ & the parameter $(W_1,\dots,W_L)\in\RR^N$ & Section~\ref{sec:intro} \\
+$\theta_0$ & initialization of the flow & Section~\ref{sec:intro} \\
+$D_l$ & imbalance $W_{l+1}^\top W_{l+1}-W_lW_l^\top$, conserved by the flow & Section~\ref{sec:intro} \\
+$\theta^*$, $W_l^*$ & limit of a bounded flow and its layers & Section~\ref{sec:intro} \\
+$D_l^\pm$ & positive and negative parts of $D_l$ & Section~\ref{sec:intro} \\
+$w$ & common width of the hidden layers & Section~\ref{sec:intro} \\
+$N$ & number of parameters, $\sum_ln_ln_{l-1}$ & Section~\ref{sec:setting} \\
+$W_{[b,a]}$ & the product $W_{b-1}\cdots W_a$, the identity when $a=b$ & Section~\ref{sec:setting} \\
+$\Omega_t$ & initial points whose solution exists on $[0,t]$ & Section~\ref{sec:setting} \\
+$\varphi_t$ & flow map on $\Omega_t$ & Section~\ref{sec:setting} \\
+$\mathcal{B}$ & initial points whose flow is bounded & Section~\ref{sec:setting} \\
+$\kappa$ & a positive scale factor of the initialization & Section~\ref{sec:setting} \\
+$M_{i,j}$, $S_{i,j}$ & products along the inner and outer arcs between layers $j<i$ & Section~\ref{sec:hessian} \\
+$r$ & rank & Section~\ref{sec:hessian} \\
+$\Sigma$ & set of strict saddles of $H$ & Section~\ref{sec:null} \\
+$H_m$ & homogeneous part of degree $m$ of $H(\theta^*+\delta)$ & Section~\ref{sec:general} \\
+$c$ & the value $H_m(u)>0$ at a critical direction $u$ & Section~\ref{sec:general} \\
+$\lambda$ & Lagrange multiplier & Section~\ref{sec:general} \\ \bottomrule
+\end{tabular}\end{center}

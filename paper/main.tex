@@ -1,0 +1,316 @@
+\documentclass[11pt]{amsart}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern,microtype,amsmath,amssymb,amsthm,mathtools,enumitem,booktabs}
+\usepackage[margin=1.1in]{geometry}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xurl}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem*{mainthm}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{example}[theorem]{Example}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+\numberwithin{equation}{section}
+
+\newcommand{\RR}{\mathbb{R}}
+\DeclareMathOperator{\Hess}{Hess}
+\DeclareMathOperator{\Tr}{Tr}
+\DeclareMathOperator{\rank}{rank}
+
+\hypersetup{pdftitle={Avoiding degenerate saddles of the homogeneous cost of deep linear networks},pdfauthor={Yitzchak Shmalo}}
+
+\title[Degenerate saddles of the homogeneous cost]{Avoiding degenerate saddles of the homogeneous cost of deep linear networks}
+\author{Yitzchak Shmalo}
+\address{Einstein Institute of Mathematics, The Hebrew University of Jerusalem, Jerusalem, Israel}
+\email{yitzchak.shmalo@gmail.com}
+\date{November 2026}
+\subjclass[2020]{68T07, 37N40, 37C10, 15A18}
+\keywords{deep linear networks, gradient flow, saddle-to-saddle dynamics, strict saddle, conserved imbalance}
+
+\begin{document}
+\begin{abstract}
+Jacot, Ged, \c{S}im\c{s}ek, Hongler and Gabriel described the small-initialization training of deep linear networks through the gradient flow of a homogeneous cost. This description needs the flow not to converge to a saddle, proved almost surely for depth at most three when the input and output dimensions agree, and with probability at least $1/2$ for larger depth. Every critical point of the cost is a strict saddle or has vanishing Hessian. The conserved imbalances between layers almost surely exclude limits with two vanishing layers and, for hidden layers of equal width, limits with two vanishing products of adjacent layers, or a vanishing layer and such a product not containing it, unless both products contain one vanishing layer. This settles depth three for every gradient of full rank, and depth four when also the hidden layers have equal width. For larger depth we reduce the question to critical points with at most one vanishing layer and give a numerical example at depth eight that the conserved quantities cannot exclude.
+\end{abstract}
+\maketitle
+
+\section{Introduction}\label{sec:intro}
+\enlargethispage{2pt}
+A deep linear network with weight matrices $W_1,\dots,W_L$ computes $x\mapsto W_L\cdots W_1x$. Its training dynamics are not linear, and they have served as a model for the behaviour of deep networks since Saxe, McClelland and Ganguli~\cite{SMG}. From a small initialization, gradient flow is observed to learn in stages: it stays near the origin, leaves along a rank-one direction, stays near a saddle of rank one, leaves again, and continues in this way through saddles of increasing rank. Jacot, Ged, \c{S}im\c{s}ek, Hongler and Gabriel~\cite{JGSHG} called this saddle-to-saddle dynamics and proved its first step. Pesme and Flammarion~\cite{PF} proved the full sequence for diagonal linear networks.
+
+The first step of~\cite{JGSHG} goes through the homogeneous cost. If $C$ is the training cost as a function of the product $W_L\cdots W_1$ and $G=\nabla C(0)$, then near the origin the cost is $C(0)+H(\theta)+O(|\theta|^{2L})$ with
+\[
+H(\theta)=\Tr\bigl(G^\top W_L\cdots W_1\bigr),
+\]
+and Theorem~2 of~\cite{JGSHG} says that, as the scale of the initialization goes to zero, the trajectory converges, after a time shift, to a path that leaves the origin along the rank-one direction in which $H$ decreases fastest. Its proof needs the gradient flow of $H$ from the initialization $\theta_0$ not to converge to a saddle of $H$ (Assumption~17 there). A bounded flow of $H$ converges to a critical point of $H$, so this holds whenever the flow is unbounded, and unboundedness is what we prove. Jacot et al.\ show that the event has probability one for $L\le3$ and probability at least $1/2$ for $L\ge4$. For $L=3$ the argument rests on their Lemma~16, which asserts for every $G$ of rank $\min\{n_0,n_3\}$ that each nonzero critical point of $H$ is a strict saddle, that is, a critical point at which the Hessian has a negative eigenvalue. For $L\ge4$ they use the symmetry $H(-W_1,W_2,\dots,W_L)=-H(\theta)$.
+
+The argument for $L=3$ does not extend. At a critical point the Hessian of $H$ is zero or has a negative eigenvalue, and it is zero exactly when, for every pair of layers, the product of the maps on one of the two arcs of the cycle $W_1,\dots,W_L,G^\top$ between them vanishes (Proposition~\ref{prop:hess}). For $L\ge4$ and every $G$ there are nonzero critical points with zero Hessian, for instance every point at which $W_2$ is the only nonzero layer (Example~\ref{ex:onelayer}), and at such a point the centre-stable manifold theorem gives nothing. Lemma~16 of~\cite{JGSHG} holds when $n_0=n_3$ and fails when $n_0\ne n_3$ (Remark~\ref{rem:three}). At critical points with zero Hessian we use the imbalances
+\[
+D_l=W_{l+1}^\top W_{l+1}-W_lW_l^\top,\qquad 1\le l\le L-1,
+\]
+which are constant along the flow, as observed by Arora, Cohen and Hazan~\cite{ACH} and Du, Hu and Lee~\cite{DHL}. The limit $\theta^*$ of a bounded flow therefore has $D_l(\theta^*)=D_l(\theta_0)$ and
+\[
+|W_j^*|_F^2-|W_i^*|_F^2=\sum_{l=i}^{j-1}\Tr D_l(\theta_0),\qquad i<j,
+\]
+so a limit with $W_i^*=W_j^*=0$ requires $|W_i(\theta_0)|_F=|W_j(\theta_0)|_F$, an event of probability zero. At depth four, with hidden layers of a common width, almost surely every $D_l(\theta_0)$ is invertible. If moreover $G$ has full rank, the Hessian vanishes at a critical point only if $W_3W_2=0$, $W_4W_3=0$ and one of $W_2$, $W_4$ is zero, after exchanging input and output if necessary. If $W_2=0$, then $D_2=W_3^\top W_3$ is invertible, so $W_3$ is invertible and $W_4=0$; if $W_4=0$, then $D_3=-W_3W_3^\top$ is invertible and $W_2=0$. In both cases two layers vanish. Together with the fact that the initializations attracted by strict saddles form a null set, this gives the following theorem.
+
+\begin{mainthm}[Theorem~\ref{thm:four}]
+At depth four, with hidden layers of a common width and $G$ of full rank, the gradient flow of $H$ from an initialization with a density is almost surely unbounded. Hence Assumption~17 of~\cite{JGSHG} holds almost surely, and the conclusion of their Theorem~2 holds almost surely at depth four.
+\end{mainthm}
+
+Besides the conservation of $D$, the proof uses two facts valid at every depth.
+\begin{enumerate}[label=(\roman*)]
+\item Since $H$ is linear in each layer, the diagonal blocks of its Hessian vanish, so the Hessian has trace zero, and at a critical point it is either zero or indefinite (Proposition~\ref{prop:hess}). The critical points with zero Hessian are exactly the non-strict saddles of rank zero in the classification of Achour, Malgouyres and Gerchinovitz~\cite{AMG}, with $G^\top$ in the place of the data matrix.
+\item Initializations whose flow converges to a strict saddle form a null set (Proposition~\ref{prop:strict}), by the centre-stable manifold theorem applied to the time-one map, as in Lee, Simchowitz, Jordan and Recht~\cite{LSJR}, Panageas and Piliouras~\cite{PP} and Lee et al.~\cite{LPPSJR}. The flow of $H$ may blow up in finite time, so we give the short argument rather than quote the version for complete flows of de~Oliveira, Siami and Sontag~\cite{OSS}.
+\end{enumerate}
+
+For $L\ge5$ we do not settle the question. There we use in addition the splitting of the imbalance at a vanishing product: if $W^*_{l+1}W^*_l=0$, then
+\[
+W_{l+1}^{*\top}W^*_{l+1}=D_l^+,\qquad W^*_lW_l^{*\top}=D_l^-,
+\]
+the positive and negative parts of $D_l(\theta_0)$, so that $|W^*_{l+1}|_F^2=\Tr D_l^+(\theta_0)$ and $|W^*_l|_F^2=\Tr D_l^-(\theta_0)$ (Lemma~\ref{lem:split}). For hidden layers of a common width $w\le\max\{n_0,n_L\}$, two such constraints, or one together with a vanishing layer, give an equation that the initialization satisfies with probability zero, except when the two vanishing products contain the same vanishing layer (Lemmas~\ref{lem:twoprod} and~\ref{lem:layerprod}). Section~\ref{sec:general} thereby reduces the question to zero-Hessian critical points with at most one vanishing layer (Corollary~\ref{cor:reduction}). At such a point, at every critical direction of the leading Taylor term with positive value, the restriction of that term to the unit sphere has a Hessian with a negative eigenvalue (Proposition~\ref{prop:scaling}), so these directions attract only a null set of directions under the leading-order flow. Example~\ref{ex:L8}, which is numerical, exhibits at $L=8$ and width $4$ a family of such points whose imbalances fill an open set; if the computation is exact, the conserved quantities alone cannot finish the proof. Numerically, all of $1000$ Gaussian flows at depths $4$ to $6$ and all of $36$ flows started near zero-Hessian points at $L=8$ escape (Section~\ref{sec:numerics}).
+
+The remaining case has a counterpart for the square loss. Bah, Rauhut, Terstiege and Westdickenberg~\cite{BRTW} showed that gradient flow for deep linear networks converges to a global minimizer of the loss restricted to matrices of some rank $k$, and conjectured that $k$ is the maximal rank for almost every initialization; Nguegnang, Rauhut and Terstiege~\cite{NRT} obtained the analogous statement for gradient descent and noted that the rank of the limit is not determined a priori. The points that block that conjecture are the non-strict saddles of~\cite{AMG} of lower rank; the points that block the homogeneous problem at depth $L\ge5$ are those of rank zero. Whether either question implies the other is not known.
+
+\medskip
+\noindent\emph{Prior work and what is new.} The setting, the role of the unbounded flow and the case $L\le3$ when $n_0=n_L$ are from~\cite{JGSHG}. The conservation of the imbalances is from~\cite{ACH,DHL}. Avoidance of strict saddles with a continuum of critical points is from~\cite{LSJR,PP,LPPSJR}, built on the centre-stable manifold theorem in the form of Shub~\cite{Shub}. The cyclic block structure of the Hessian of the square loss and the classification of its non-strict saddles are from~\cite{AMG}. New here are the dichotomy of Proposition~\ref{prop:hess} for every depth, the identification of the zero-Hessian set with the rank-zero tightened set, the splitting of the imbalance at a vanishing product and the null-event lemmas built on it, the theorem at depth four, the case $L=3$ with $n_0\ne n_3$, the scaling proposition and the numerical example at depth eight.
+
+The sections depend on one another as follows.
+\begin{center}
+\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+Section & What it proves & What it uses\\ \midrule
+\ref{sec:setting} & convergence of bounded flows, conservation of $D$ & \L{}ojasiewicz inequality, conservation laws\\
+\ref{sec:hessian} & Proposition~\ref{prop:hess}: zero or indefinite Hessian & multilinearity, block structure\\
+\ref{sec:null} & Proposition~\ref{prop:strict}, Lemmas~\ref{lem:twozero}--\ref{lem:layerprod} & Section~\ref{sec:setting}, centre-stable manifolds\\
+\ref{sec:four} & Theorem~\ref{thm:four} & Sections~\ref{sec:setting}--\ref{sec:null}\\
+\ref{sec:general} & Corollary~\ref{cor:reduction}, Proposition~\ref{prop:scaling}, Example~\ref{ex:L8} & Sections~\ref{sec:hessian} and~\ref{sec:null}\\
+\ref{sec:numerics} & numerical checks & Sections~\ref{sec:four} and~\ref{sec:general}\\ \bottomrule
+\end{tabular}
+\end{center}
+
+\section{Setting}\label{sec:setting}
+Let $n_0,\dots,n_L$ be positive integers, $W_l\in\RR^{n_l\times n_{l-1}}$, $\theta=(W_1,\dots,W_L)\in\RR^N$ with $N=\sum_ln_ln_{l-1}$, and $G\in\RR^{n_L\times n_0}$. For $1\le a\le b\le L+1$ write $W_{[b,a]}=W_{b-1}\cdots W_a$, with $W_{[a,a]}$ the identity. The homogeneous cost is
+\[
+H(\theta)=\Tr\bigl(G^\top W_L\cdots W_1\bigr)=\langle G,W_L\cdots W_1\rangle_F,
+\]
+which is the cost of~\cite{JGSHG} up to transposing $G$. We consider the descent flow $\theta'=-\nabla H(\theta)$, where
+\begin{equation}\label{eq:grad}
+\nabla_{W_l}H=\bigl(W_L\cdots W_{l+1}\bigr)^\top G\bigl(W_{l-1}\cdots W_1\bigr)^\top .
+\end{equation}
+The vector field is polynomial. For $t\ge0$ let $\Omega_t$ be the set of $\theta_0$ whose solution exists on $[0,t]$ and $\varphi_t$ the flow map on $\Omega_t$. The set $\Omega_t$ is open and $\varphi_t\colon\Omega_t\to\varphi_t(\Omega_t)$ is a $C^\infty$ diffeomorphism with inverse $\varphi_{-t}$.
+
+\begin{lemma}\label{lem:loj}
+If the solution from $\theta_0$ is bounded on its maximal interval, it exists for all $t\ge0$ and converges to a critical point of $H$.
+\end{lemma}
+\begin{proof}
+A bounded solution of a polynomial vector field exists for all positive time. The cost $H$ is a polynomial, hence real analytic, and by the theorem of \L{}ojasiewicz a bounded trajectory of the gradient flow of an analytic function has a unique limit, which is a critical point; see~\cite{ColdingMinicozzi}.
+\end{proof}
+
+Let $\mathcal{B}$ be the set of $\theta_0$ whose flow is bounded. By Lemma~\ref{lem:loj}, $\mathcal{B}$ is the set of initial points whose flow converges to a critical point. Assumption~17 of~\cite{JGSHG} asks that the flow not converge to a saddle of $H$; the initializations it excludes form a subset of $\mathcal{B}$, so every $\theta_0\notin\mathcal{B}$ satisfies it. Since $H$ is homogeneous of degree $L$, the flow from $\kappa\theta_0$ with $\kappa>0$ is a time change of $\kappa$ times the flow from $\theta_0$, so $\mathcal{B}$ is a cone and the scale of the initialization plays no role.
+
+The imbalances
+\[
+D_l(\theta)=W_{l+1}^\top W_{l+1}-W_lW_l^\top\in\RR^{n_l\times n_l},\qquad 1\le l\le L-1,
+\]
+are constant along the flow~\cite{ACH,DHL}: by~\eqref{eq:grad}, $W_{l+1}^\top\nabla_{W_{l+1}}H=\nabla_{W_l}H\,W_l^\top$, both sides being $E=(W_L\cdots W_{l+1})^\top G(W_{l-1}\cdots W_1)^\top W_l^\top$, so the derivatives of $W_{l+1}^\top W_{l+1}$ and of $W_lW_l^\top$ both equal $-(E+E^\top)$ and $D_l'=0$. Taking traces, $|W_{l+1}|_F^2-|W_l|_F^2=\Tr D_l$ is conserved, and for $i<j$
+\begin{equation}\label{eq:telescope}
+|W_j|_F^2-|W_i|_F^2=\sum_{l=i}^{j-1}\Tr D_l .
+\end{equation}
+Write $D=(D_1,\dots,D_{L-1})$. If $\theta_0\in\mathcal{B}$ and $\theta^*$ is its limit, then $D(\theta^*)=D(\theta_0)$.
+
+\section{The Hessian at a critical point}\label{sec:hessian}
+Read the maps $W_1,\dots,W_L,G^\top$ as a cycle of $L+1$ maps, $G^\top$ following $W_L$ and preceding $W_1$. For layers $j<i$ the cycle minus $\{W_j,W_i\}$ consists of two arcs, the inner arc
+\[
+M_{ij}=W_{i-1}\cdots W_{j+1}\in\RR^{n_{i-1}\times n_j}
+\]
+and the outer arc
+\[
+S_{ij}=W_{j-1}\cdots W_1\,G^\top\,W_L\cdots W_{i+1}\in\RR^{n_{j-1}\times n_i}.
+\]
+For $i=j$ write $S_{ll}=W_{l-1}\cdots W_1G^\top W_L\cdots W_{l+1}$. By~\eqref{eq:grad}, $\theta$ is critical if and only if $S_{ll}=0$ for every $l$.
+
+\begin{proposition}\label{prop:hess}
+Let $\theta$ be a critical point of $H$.
+\begin{enumerate}[label=(\alph*)]
+\item The Hessian of $H$ at $\theta$ is either zero or has a negative eigenvalue.
+\item The Hessian is zero if and only if $M_{ij}=0$ or $S_{ij}=0$ for every pair $j<i$.
+\end{enumerate}
+\end{proposition}
+\begin{proof}
+The cost $H$ is linear in each $W_l$, so the diagonal blocks $\partial^2_{W_lW_l}H$ vanish and the Hessian has trace zero. A nonzero symmetric matrix with trace zero has a negative eigenvalue, which gives (a). For $j<i$, replacing $W_i$ by $\delta_i$ and $W_j$ by $\delta_j$ in the product and using the cyclicity of the trace,
+\[
+\partial^2H[\delta_i,\delta_j]=\Tr\bigl(G^\top W_L\cdots W_{i+1}\,\delta_i\,M_{ij}\,\delta_j\,W_{j-1}\cdots W_1\bigr)=\Tr\bigl(\delta_i\,M_{ij}\,\delta_j\,S_{ij}\bigr).
+\]
+With $\delta_i=e_ae_b^\top$ and $\delta_j=e_ce_d^\top$ this equals $(M_{ij})_{bc}(S_{ij})_{da}$. The block vanishes for all $a,b,c,d$ if and only if $M_{ij}=0$ or $S_{ij}=0$, which gives (b).
+\end{proof}
+
+For adjacent layers $M_{l+1,l}$ is the identity, so a zero Hessian forces $S_{l+1,l}=0$ for every $l$. In the terminology of Achour, Malgouyres and Gerchinovitz~\cite[Definitions~3, 5 and~6, Theorem~7]{AMG}, who close the chain of the square loss into a cycle through the data matrix and call a pivot $(i,j)$ tightened when one of its two complementary blocks has the rank $r$ of the product, the condition in (b) says that every pivot of the cycle $(W_1,\dots,W_L,G^\top)$ is tightened with $r=0$. Thus the zero-Hessian critical points of $H$ are the rank-zero non-strict saddles of that classification, with $G^\top$ in the place of the data matrix.
+
+\begin{example}\label{ex:onelayer}
+Let $L\ge4$, let $G$ be arbitrary, and let $\theta$ have $W_2\ne0$ and every other layer zero. Each $S_{ll}$ contains a vanishing layer, so $\theta$ is a critical point. For $j<i$ the inner arc $M_{ij}$ contains a vanishing layer unless $i=j+1$ or $(i,j)=(3,1)$, and in these cases the outer arc $S_{ij}$ contains $W_1$, $W_3$ or $W_4$. By Proposition~\ref{prop:hess}(b) the Hessian of $H$ at $\theta$ is zero. For $L=3$ the same point has $S_{31}=G^\top$, and its Hessian is not zero when $G\ne0$.
+\end{example}
+
+\begin{remark}\label{rem:three}
+Let $L=3$ and let $G$ have rank $\min\{n_0,n_3\}$. For the pair $(3,1)$ the inner arc is $W_2$ and the outer arc is $G^\top$, so by Proposition~\ref{prop:hess}(b) a zero Hessian forces $W_2=0$, $G^\top W_3=0$ and $W_1G^\top=0$. If $n_0=n_3$, then $G$ is invertible and $\theta=0$, so every nonzero critical point is a strict saddle; this is Lemma~16 of~\cite{JGSHG}, which is stated there for every $G$ of rank $\min\{n_0,n_3\}$. If $n_3>n_0$, every $W_3\ne0$ with $G^\top W_3=0$ gives a nonzero critical point $(0,0,W_3)$ with zero Hessian, and $(W_1,0,0)$ with $W_1G^\top=0$ does the same when $n_0>n_3$; the smallest case is $n_0=n_1=n_2=1$, $n_3=2$. The almost sure conclusion at $L=3$ still holds for every such $G$. If $n_0\le n_3$ the map $G^\top$ is onto and $W_1G^\top=0$ gives $W_1=0$; if $n_0\ge n_3$ it is injective and $G^\top W_3=0$ gives $W_3=0$. Either way two layers vanish, and by Proposition~\ref{prop:strict} and Lemma~\ref{lem:twozero} the flow of $H$ is unbounded almost surely.
+\end{remark}
+
+\section{Null events}\label{sec:null}
+In this section $\theta_0$ has a law absolutely continuous with respect to Lebesgue measure on $\RR^N$; a Gaussian initialization is the main example.
+
+\begin{proposition}\label{prop:strict}
+The set of $\theta_0$ whose flow converges to a critical point at which the Hessian of $H$ has a negative eigenvalue is a Lebesgue null set.
+\end{proposition}
+\begin{proof}
+Let $\Sigma$ be the set of such critical points. At $\theta^*\in\Sigma$ the time-one map satisfies $D\varphi_1(\theta^*)=\exp(-\Hess H(\theta^*))$, which has an eigenvalue larger than one, so its centre-stable subspace has dimension at most $N-1$. By the centre-stable manifold theorem for a local diffeomorphism at a fixed point~\cite[Theorem~III.7]{Shub}, in the form used in~\cite[proof of Theorem~2]{LPPSJR}, there are an open ball $B(\theta^*)\subset\Omega_1$ and an embedded $C^1$ disc $W(\theta^*)$ of dimension at most $N-1$ such that $\varphi_1^n(\theta)\in B(\theta^*)$ for all $n\ge0$ implies $\theta\in W(\theta^*)$. The set $\Sigma$ need not be discrete; as in~\cite{PP}, by the Lindel\"of property countably many of the balls, $B_k=B(\theta_k^*)$, cover $\Sigma$. If $\varphi_t(\theta_0)\to\theta^*\in\Sigma$, choose $k$ with $\theta^*\in B_k$ and $p$ with $\varphi_n(\theta_0)\in B_k$ for all $n\ge p$. Then $\varphi_p(\theta_0)\in W(\theta_k^*)$, so
+\[
+\theta_0\in\varphi_{-p}\bigl(W(\theta_k^*)\cap\varphi_p(\Omega_p)\bigr),
+\]
+the image of a null set under a diffeomorphism. The set in question lies in the countable union of these null sets over $k$ and $p$.
+\end{proof}
+
+\begin{lemma}\label{lem:twozero}
+For all widths and every $G$, the set of $\theta_0$ whose flow converges to a point with $W_i=W_j=0$ for some $i\ne j$ is null.
+\end{lemma}
+\begin{proof}
+By~\eqref{eq:telescope} and conservation, such $\theta_0$ satisfies $|W_i(\theta_0)|_F^2=|W_j(\theta_0)|_F^2$, a nonzero polynomial equation.
+\end{proof}
+
+The next lemma is the algebraic fact behind the remaining null events.
+
+\begin{lemma}\label{lem:split}
+If $W_{l+1}W_l=0$, then $W_{l+1}^\top W_{l+1}=D_l^+$ and $W_lW_l^\top=D_l^-$, where $D_l=D_l^+-D_l^-$ with $D_l^\pm$ positive semidefinite and $D_l^+D_l^-=0$. In particular $|W_{l+1}|_F^2=\Tr D_l^+$ and $|W_l|_F^2=\Tr D_l^-$.
+\end{lemma}
+\begin{proof}
+The matrices $P=W_{l+1}^\top W_{l+1}$ and $Q=W_lW_l^\top$ are positive semidefinite and $PQ=W_{l+1}^\top(W_{l+1}W_l)W_l^\top=0$. Hence $QP=(PQ)^\top=0$, the two matrices commute and have orthogonal ranges, and $D_l=P-Q$ is the decomposition into positive and negative parts.
+\end{proof}
+
+No invertibility of $D_l$ is needed here. This matters, because $D_l$ can be singular identically: if $n_l>n_{l-1}+n_{l+1}$ then $\rank D_l\le n_{l-1}+n_{l+1}<n_l$.
+
+We say that the hidden layers are \emph{square} if $n_1=\dots=n_{L-1}=w$ for some $w$ with $1\le w\le\max\{n_0,n_L\}$. For square hidden layers $D$ is a submersion on a set of full measure.
+
+\begin{lemma}\label{lem:submersion}
+Let the hidden layers be square with $w\le n_L$. On the open set where $W_2,\dots,W_{L-1}$ are invertible and $W_L$ has rank $w$, the differential of $D\colon\RR^N\to\mathrm{Sym}(w)^{L-1}$ is onto. Consequently $D^{-1}(Z)$ is null for every null set $Z\subset\mathrm{Sym}(w)^{L-1}$.
+\end{lemma}
+\begin{proof}
+Given symmetric $Y_1,\dots,Y_{L-1}$, set $\delta_1=0$ and, for $l=1,\dots,L-1$, choose $\delta_{l+1}$ with $W_{l+1}^\top\delta_{l+1}=\tfrac12\bigl(Y_l+\delta_lW_l^\top+W_l\delta_l^\top\bigr)$; this is possible since $W_{l+1}$ has rank $w$, so $W_{l+1}^\top$ is onto. Then
+\[
+dD_l[\delta]=\delta_{l+1}^\top W_{l+1}+W_{l+1}^\top\delta_{l+1}-\delta_lW_l^\top-W_l\delta_l^\top=Y_l
+\]
+for every $l$. The set in the statement has full measure, and the preimage of a null set under a submersion is null.
+\end{proof}
+The reversal $(W_1,\dots,W_L)\mapsto(W_L^\top,\dots,W_1^\top)$ carries the cost for $G$ to the cost for $G^\top$, exchanges $n_0$ and $n_L$ and maps $D_l$ to $-D_{L-l}$, so Lemma~\ref{lem:submersion} also holds when $w\le n_0$, with $W_1$ of rank $w$ in place of $W_L$. For square hidden layers $D^{-1}(Z)$ is therefore null for every null set $Z$.
+
+\begin{lemma}\label{lem:twoprod}
+Let the hidden layers be square and $1\le l<m\le L-1$. Up to the null set of Lemma~\ref{lem:twozero}, the set of $\theta_0$ whose flow converges to a point $\theta^*$ with $W^*_{l+1}W^*_l=0$ and $W^*_{m+1}W^*_m=0$, other than a point with $m=l+1$ and $W^*_{l+1}=0$, is null.
+\end{lemma}
+\begin{proof}
+By Lemma~\ref{lem:split} at both products and~\eqref{eq:telescope} between layers $l+1$ and $m$, $D(\theta_0)$ satisfies
+\[
+F(D):=\Tr D_m^- -\Tr D_l^+-\sum_{i=l+1}^{m-1}\Tr D_i=0,
+\]
+the sum being empty if $m=l+1$. Fix all blocks except $D_l$ and $D_m$ and move along the line $t\mapsto(D_l+tI,D_m+tI)$. The function $t\mapsto\Tr(D_m+tI)^-$ is nonincreasing and $t\mapsto\Tr(D_l+tI)^+$ is nondecreasing, so $F$ is nonincreasing in $t$, and it is constant on an interval $[t_0,t_1]$ only if for $t\in(t_0,t_1)$ the matrix $D_m+tI$ has no negative and $D_l+tI$ no positive eigenvalue. Hence on each such line the points with $F=0$ that do not satisfy $D_m\ge0$ and $D_l\le0$ are at most the two ends of the zero interval. By Fubini the set $Z=\{F=0\}\setminus\{D_m\ge0,\ D_l\le0\}$ is null, and $D^{-1}(Z)$ is null by Lemma~\ref{lem:submersion}. If instead $D_l(\theta_0)\le0$ and $D_m(\theta_0)\ge0$, Lemma~\ref{lem:split} at the limit gives $W^{*\top}_{l+1}W^*_{l+1}=D_l^+=0$ and $W^*_mW^{*\top}_m=D_m^-=0$, so $W^*_{l+1}=W^*_m=0$. For $m>l+1$ these are two vanishing layers, covered by Lemma~\ref{lem:twozero}; for $m=l+1$ this is the excluded case.
+\end{proof}
+
+\begin{lemma}\label{lem:layerprod}
+The same conclusion holds when one of the two products is replaced by a vanishing layer outside the other. Let the hidden layers be square and $k\notin\{l,l+1\}$. Apart from the null set of Lemma~\ref{lem:twozero}, the initial points whose limit has $W^*_k=0$ and $W^*_{l+1}W^*_l=0$ form a null set.
+\end{lemma}
+\begin{proof}
+If $k\ge l+2$, then~\eqref{eq:telescope} between layers $l+1$ and $k$ and Lemma~\ref{lem:split} give $\Tr D_l^++\sum_{i=l+1}^{k-1}\Tr D_i=0$. Along $t\mapsto D_l+tI$ only the first term moves; it is nondecreasing and constant on an interval only where $D_l+tI\le0$. As in Lemma~\ref{lem:twoprod} the equation is a null event outside $\{D_l\le0\}$, and $D_l\le0$ gives $W^*_{l+1}=0$, a second vanishing layer. If $k\le l-1$, the same argument applies to $\Tr D_l^-=\sum_{i=k}^{l-1}\Tr D_i$, with leftover case $D_l\ge0$, which gives $W^*_l=0$.
+\end{proof}
+
+\begin{remark}
+Lemmas~\ref{lem:twoprod} and~\ref{lem:layerprod} hold for rectangular layers whenever $D$ is a submersion almost everywhere, for instance when $n_1\le n_2\le\dots\le n_L$ (the proof of Lemma~\ref{lem:submersion} applies verbatim) or when the widths are nonincreasing (run the recursion from the top with right inverses).
+\end{remark}
+
+\section{Depth four}\label{sec:four}
+\begin{theorem}\label{thm:four}
+Let $L=4$ and $n_1=n_2=n_3=w$, with $n_0,n_4,w\ge1$ arbitrary, and let $G\in\RR^{n_4\times n_0}$ have rank $\min\{n_0,n_4\}$. If $\theta_0$ has a law absolutely continuous with respect to Lebesgue measure, then almost surely the flow of $H$ from $\theta_0$ is unbounded. In particular Assumption~17 of~\cite{JGSHG} holds almost surely, and in their Theorem~2 with $L=4$ the probability bound $1/2$ can be replaced by $1$.
+\end{theorem}
+\begin{proof}
+Each $\det D_l$ is a polynomial in $\theta$ that is not identically zero ($W_l=0$ and $W_{l+1}=I$ for $l=1,2$, $W_3=I$ and $W_4=0$ for $l=3$, give $\det D_l=\pm1$), so almost surely every $D_l(\theta_0)$ is invertible, and then so is every $D_l(\theta^*)$ for the limit $\theta^*$ of a bounded flow. By Lemma~\ref{lem:loj}, Proposition~\ref{prop:strict} and Lemma~\ref{lem:twozero} it suffices to show that every zero-Hessian critical point with all $D_l$ invertible has two vanishing layers.
+
+The reversal $(W_1,W_2,W_3,W_4)\mapsto(W_4^\top,W_3^\top,W_2^\top,W_1^\top)$ is a linear isometry that carries the cost for $G$ to the cost for $G^\top$, exchanges $n_0$ and $n_4$, maps $D_l$ to $-D_{4-l}$ and keeps vanishing layers vanishing, so we may assume $n_4\le n_0$. Then $G^\top$ is injective. Let $\theta$ be a zero-Hessian critical point with all $D_l$ invertible. Proposition~\ref{prop:hess}(b) for the pairs $(4,1)$, $(2,1)$, $(3,2)$ and $(4,3)$ gives
+\[
+W_3W_2=0,\qquad W_4W_3=0,\qquad W_1G^\top W_4=0,\qquad W_2W_1G^\top=0,
+\]
+where $W_4W_3=0$ follows from $G^\top W_4W_3=0$ by injectivity. The pairs $(3,1)$ and $(4,2)$ give $W_2=0$ or $W_4=0$, and $W_3=0$ or $W_1G^\top=0$.
+If $W_2\ne0$, then $W_4=0$, so $D_3=-W_3W_3^\top$ is invertible, $W_3$ is invertible, and $W_3W_2=0$ forces $W_2=0$, a contradiction. Hence $W_2=0$. Then $D_2=W_3^\top W_3$ is invertible, so $W_3$ is invertible and $W_4W_3=0$ gives $W_4=0$. Thus $W_2=W_4=0$. When $n_0=n_4$ there is no such point at all: $W_3\ne0$ gives $W_1G^\top=0$, hence $W_1=0$, while $D_1=-W_1W_1^\top$ is invertible.
+
+For the last statement: by Lemma~\ref{lem:loj} the flow of $H$ from $\theta_0$ is unbounded exactly when $\theta_0\notin\mathcal{B}$, which implies the event of Assumption~17, and the remaining hypotheses of Theorem~2 of~\cite{JGSHG} do not involve $\mathcal{B}$.
+\end{proof}
+
+\section{General depth}\label{sec:general}
+Combining Lemma~\ref{lem:loj}, Proposition~\ref{prop:strict} and Lemmas~\ref{lem:twozero}--\ref{lem:layerprod}:
+
+\begin{corollary}\label{cor:reduction}
+Let the hidden layers be square. For almost every $\theta_0\in\mathcal{B}$ the limit $\theta^*$ is a zero-Hessian critical point with at most one vanishing layer, at which either no layer vanishes and at most one product $W^*_{l+1}W^*_l$ vanishes, or exactly one layer $W^*_k$ vanishes and the only vanishing products are those among $W^*_{k+1}W^*_k$ and $W^*_kW^*_{k-1}$ that are defined.
+\end{corollary}
+
+At such a point the next term of the Taylor expansion has a special form. Let $\theta^*$ be a zero-Hessian critical point with $W_k^*=0$ and $W_l^*\ne0$ for $l\ne k$, and let $H(\theta^*+\delta)=\sum_{m\ge3}H_m(\delta)$ with $H_m$ homogeneous of degree $m$. Each monomial of $H(\theta^*+\delta)$ contains the factor $\delta_k$ exactly once, since $W_k^*=0$ and $H$ is linear in $W_k$. Writing $\delta=(x,y)$ with $x=\delta_k$, each $H_m$ has the form $H_m(x,y)=\langle x,B_m(y)\rangle$ with $B_m$ homogeneous of degree $m-1$.
+
+\begin{proposition}\label{prop:scaling}
+Let $m$ be the lowest order with $H_m\not\equiv0$, and let $u=(x,y)$ be a critical point of the restriction of $H_m$ to the unit sphere with $H_m(u)=c>0$. Then $|x|^2=1/m$, $|y|^2=(m-1)/m$, and the Hessian of the restriction of $H_m$ to the unit sphere has a negative eigenvalue at $u$: along the curve $(ax,by)$ with $a^2/m+b^2(m-1)/m=1$, $H_m$ has a strict local maximum at $a=b=1$ with negative second derivative.
+\end{proposition}
+\begin{proof}
+At a critical point on the sphere $\nabla H_m(u)=\lambda u$ for a Lagrange multiplier $\lambda$, and Euler's identity gives $\lambda=mc$. Euler's identity for the two groups of variables gives $\langle\nabla_xH_m,x\rangle=c$ and $\langle\nabla_yH_m,y\rangle=(m-1)c$, so $mc|x|^2=c$ and $mc|y|^2=(m-1)c$. Along the curve, $|ax|^2+|by|^2=1$ and $H_m(ax,by)=ab^{m-1}c$. Writing $a=\sqrt m\cos\alpha$ and $b=\sqrt{m/(m-1)}\sin\alpha$, the function $\log\cos\alpha+(m-1)\log\sin\alpha$ has second derivative $-\sec^2\alpha-(m-1)\csc^2\alpha<0$ and a critical point where $a=b=1$, so $ab^{m-1}$ has a strict local maximum there with negative second derivative and, since $c>0$, so does $H_m$. The velocity of the curve at $a=b=1$ is nonzero, and since $u$ is critical on the sphere the second derivative of $H_m$ along a curve on the sphere through $u$ is the Hessian of the restriction evaluated on the velocity.
+\end{proof}
+
+In the blow-up $\delta=ru$ with $|u|=1$, the descent flow reads $r'=-mH_m(u)r^{m-1}+O(r^m)$, and after a change of time $u$ follows the descent flow of $H_m$ on the sphere up to terms of higher order in $r$. The radius decreases at leading order only where $H_m(u)>0$. By Proposition~\ref{prop:scaling}, at each critical direction $u$ with $H_m(u)>0$ the Hessian of the restriction of $H_m$ to the sphere has a negative eigenvalue. The descent flow of that restriction is complete, since the sphere is compact, and the proof of Proposition~\ref{prop:strict}, carried out in charts of the sphere, shows that the directions whose leading-order flow converges to such a critical direction form a null set. What the proposition does not cover is trajectories whose directions accumulate on critical directions with $H_m(u)=0$, which include the directions tangent to the component of critical points through $\theta^*$; there the leading term is silent. We do not know how to control these trajectories in general.
+
+The next example, which is numerical, indicates that the conserved imbalances cannot settle these points.
+
+\begin{example}\label{ex:L8}
+Let $L=8$, $n_0=\dots=n_8=4$ and $G$ a fixed Gaussian $4\times4$ matrix. Numerically, there are zero-Hessian critical points with $W_1=0$, layer ranks $(0,4,2,3,2,2,3,2)$, no vanishing product $W_{l+1}W_l$ other than $W_2W_1$, and all $D_l$ invertible, near which the critical points form a manifold on which the Jacobian of $D$ has rank $70=\dim\mathrm{Sym}(4)^7$. If these computations are exact, the image under $D$ of the zero-Hessian critical set contains an open set, and no argument that uses only the conserved quantities $D$ can show that the flow avoids these points almost surely. The points are constructed by fixing the ranks of the layers and solving the conditions of Proposition~\ref{prop:hess}(b); the gradient at the constructed point is below $10^{-27}$, the Hessian, computed by finite differences, is below $10^{-12}$, and the rank of the Jacobian of $D$ along the critical manifold is computed by singular values. The script is in the repository listed under Data availability.
+\end{example}
+
+\section{Numerical checks}\label{sec:numerics}
+All computations are in double precision with the scripts listed under Data availability.
+
+\emph{Flows from Gaussian initialization.} For $(L,n,w)\in\{(4,3,3),(4,4,2),(5,2,4),(5,3,3),(6,3,3)\}$ we integrated the flow of $H$ from $200$ independent standard Gaussian initializations each, with $G$ a fixed Gaussian $n\times n$ matrix and an adaptive step that moves the point by at most $10^{-3}$ of its norm. A run counts as escaping when $|\theta|$ exceeds $10^4$, and as bounded when the gradient falls below $10^{-12}$ or after $4\cdot10^5$ steps. All $1000$ runs escaped. At escape, $H(\theta)/|\theta|^L$ was within $7.5\%$ of $-s_1L^{-L/2}$, the minimum of $H$ on the unit sphere, where $s_1$ is the largest singular value of $G$, as predicted by Proposition~14 of~\cite{JGSHG}. For $(L,n,w)=(4,3,3)$ about half the initial points have $H(\theta_0)>0$, so these runs are not covered by the bound $1/2$ of~\cite{JGSHG}.
+
+\emph{Flows near the example.} Starting from $\theta^*+\xi$ with $\theta^*$ a point of Example~\ref{ex:L8} and $\xi$ uniform on the sphere of radius $\varepsilon|\theta^*|$, with Armijo backtracking, all $12$ runs escaped for $\varepsilon=0.05$ and all $12$ for $\varepsilon=0.005$. Another $12$ runs started near a zero-Hessian point with a vanishing product $W_8W_7=0$, whose $D$-image has codimension one, also escaped. In every run the distance to $\theta^*$ stayed above $0.94$ times its initial value.
+
+\emph{The leading term at the example.} At a point of Example~\ref{ex:L8} the leading order is $m=3$ along random directions, and $H_3(-x,y)=-H_3(x,y)$ to machine precision. Projected descent of $H_3$ on the unit sphere of $\RR^{128}$ from $20$ Gaussian starts ended at the same value $-357.80$ in all runs, with $|x|=0.577$, which is $1/\sqrt3$ as in Proposition~\ref{prop:scaling} applied to $-H_3$; no run ended at a local minimum with value $\ge0$.
+
+\section*{Acknowledgements and funding}
+This work was done by AI agents, Claude (Anthropic) and Codex (OpenAI), connected to Math Brain~\cite{MathBrainRepo} and working inside the Brain framework~\cite{BrainFramework}, a shared, persistent memory in which the agents record claims, proofs, failed attempts and methods, retrieve one another's results, coordinate who works on what, and audit each other's work. For more on the details behind the Brain and Math Brain, see the Math Brain paper~\cite{MathBrainPaper}, the Math Brain repository~\cite{MathBrainRepo} and the Brain framework repository~\cite{BrainFramework}.
+
+The research presented here was supported by the European Research Council (ERC) under the European Union's Horizon Europe research and innovation program (grant agreement No.~101041711) and by the Simons Foundation as part of the Collaboration on the Mathematical and Scientific Foundations of Deep Learning. It was also supported by Heights Labs, by Convex Nexus Capital, by the Israel Science Foundation (grant number 2258/19), and by the Israel Science Foundation (ISF Grant 4101/25). Computational resources were provided in part by Google Cloud through its education credits program (credit 530550103).
+
+\section*{Declaration of competing interest}
+The author holds equity in Heights Labs and in Convex Nexus Capital and has a management role at Convex Nexus Capital. These entities are included in the funding declaration above.
+
+\section*{Declaration of generative AI and AI-assisted technologies}
+The work was done by AI agents connected to Math Brain~\cite{MathBrainRepo} and working inside the Brain framework~\cite{BrainFramework}, described in~\cite{MathBrainPaper}. In November 2026 Claude Opus~5.5 (Anthropic), working in Claude Code, developed the proofs, wrote and ran the numerical scripts, and wrote the paper. The problem and the role of the unbounded flow are due to Jacot, Ged, \c{S}im\c{s}ek, Hongler and Gabriel~\cite{JGSHG}. The conserved imbalances are due to Arora, Cohen and Hazan~\cite{ACH} and Du, Hu and Lee~\cite{DHL}. Strict-saddle avoidance is due to Lee, Simchowitz, Jordan and Recht~\cite{LSJR} and Panageas and Piliouras~\cite{PP}, and the block structure of the Hessian to Achour, Malgouyres and Gerchinovitz~\cite{AMG}. What is new is listed at the end of Section~\ref{sec:intro}. The author directed the work and is responsible for the content of the paper and for decisions concerning its dissemination.
+
+\section*{Data availability}
+The proofs do not depend on computation. The \LaTeX{} source of the paper and the Python scripts of Section~\ref{sec:numerics} and Example~\ref{ex:L8} are available at \url{https://github.com/yspennstate/deep-linear-homogeneous-cost-saddles/tree/v1.0}.
+
+\appendix
+\input{notation}
+
+\begin{thebibliography}{99}
+\bibitem{AMG} E.~M.~Achour, F.~Malgouyres and S.~Gerchinovitz, \emph{The loss landscape of deep linear neural networks: a second-order analysis}, Journal of Machine Learning Research 25 (2024), no.~242, 1--76, arXiv:2107.13289.
+\bibitem{ACH} S.~Arora, N.~Cohen and E.~Hazan, \emph{On the optimization of deep networks: implicit acceleration by overparameterization}, Proceedings of Machine Learning Research 80 (2018), arXiv:1802.06509.
+\bibitem{BRTW} B.~Bah, H.~Rauhut, U.~Terstiege and M.~Westdickenberg, \emph{Learning deep linear neural networks: Riemannian gradient flows and convergence to global minimizers}, Information and Inference 11 (2022), no.~1, 307--353, arXiv:1910.05505.
+\bibitem{ColdingMinicozzi} T.~H.~Colding and W.~P.~Minicozzi~II, \emph{\L{}ojasiewicz inequalities and applications}, in \emph{Surveys in Differential Geometry 2014: Regularity and Evolution of Nonlinear Equations}, Surveys in Differential Geometry 19, International Press, Somerville, MA, 2015, 63--82, arXiv:1402.5087.
+\bibitem{DHL} S.~S.~Du, W.~Hu and J.~D.~Lee, \emph{Algorithmic regularization in learning deep homogeneous models: layers are automatically balanced}, Advances in Neural Information Processing Systems 31 (2018), arXiv:1806.00900.
+\bibitem{JGSHG} A.~Jacot, F.~Ged, B.~\c{S}im\c{s}ek, C.~Hongler and F.~Gabriel, \emph{Saddle-to-saddle dynamics in deep linear networks: small initialization training, symmetry, and sparsity}, arXiv:2106.15933 (2021).
+\bibitem{LPPSJR} J.~D.~Lee, I.~Panageas, G.~Piliouras, M.~Simchowitz, M.~I.~Jordan and B.~Recht, \emph{First-order methods almost always avoid strict saddle points}, Mathematical Programming 176 (2019), 311--337.
+\bibitem{LSJR} J.~D.~Lee, M.~Simchowitz, M.~I.~Jordan and B.~Recht, \emph{Gradient descent only converges to minimizers}, Proceedings of Machine Learning Research 49 (2016), 1246--1257.
+\bibitem{NRT} G.~M.~Nguegnang, H.~Rauhut and U.~Terstiege, \emph{Convergence of gradient descent for learning linear neural networks}, Advances in Continuous and Discrete Models 2024, Paper No.~23, arXiv:2108.02040.
+\bibitem{OSS} A.~C.~B.~de~Oliveira, M.~Siami and E.~D.~Sontag, \emph{Convergence analysis of gradient flow for overparameterized LQR formulations}, arXiv:2408.15456 (2024).
+\bibitem{PP} I.~Panageas and G.~Piliouras, \emph{Gradient descent only converges to minimizers: non-isolated critical points and invariant regions}, 8th Innovations in Theoretical Computer Science Conference (ITCS 2017), LIPIcs 67 (2017), 2:1--2:12.
+\bibitem{PF} S.~Pesme and N.~Flammarion, \emph{Saddle-to-saddle dynamics in diagonal linear networks}, Advances in Neural Information Processing Systems 36 (2023), arXiv:2304.00488.
+\bibitem{SMG} A.~M.~Saxe, J.~L.~McClelland and S.~Ganguli, \emph{Exact solutions to the nonlinear dynamics of learning in deep linear neural networks}, International Conference on Learning Representations (2014), arXiv:1312.6120.
+\bibitem{Shub} M.~Shub, \emph{Global stability of dynamical systems}, Springer, New York, 1987.
+\bibitem{MathBrainRepo} Y.~Shmalo, \emph{Math Brain: public snapshot, code and tests}, 2026, \url{https://github.com/yspennstate/math-brain-public/tree/8c9a6bd478c4ec4082347151b7ae16db50c917dd}.
+\bibitem{MathBrainPaper} Y.~Shmalo, \emph{Math Brain: shared, auditable memory for multi-agent mathematical research}, October 2026, \url{https://github.com/yspennstate/math-brain-public/tree/main/papers/math-brain-2026-10-24}, doi:10.5281/zenodo.24150837.
+\bibitem{BrainFramework} Y.~Shmalo, \emph{Brain Framework}, public software repository, 2026, \url{https://github.com/yspennstate/brain-framework-public/tree/5629e644cdd510173ae97e9aa92642dabd22dc57}.
+\end{thebibliography}
+\end{document}
